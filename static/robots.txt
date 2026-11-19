@@ -1,0 +1,3 @@
+# Courtnotes instances hold private court-watch data. Keep them out of search engines.
+User-agent: *
+Disallow: /

@@ -1,0 +1,282 @@
+/*
+ * Courtnotes design tokens.
+ * Dark by default: a phone screen in a quiet courtroom should not glow. Contrast stays high
+ * (AA or better) and every touch target is at least 48px.
+ */
+:root {
+	color-scheme: dark;
+	--bg: #0c0d0f;
+	--surface: #15171b;
+	--surface-2: #1c1f24;
+	--surface-3: #252931;
+	--border: #2c3038;
+	--border-strong: #3a3f49;
+	--text: #ece9e2;
+	--text-2: #b9b8b3;
+	--muted: #8d8f96;
+	--accent: #e8b04a;
+	--accent-strong: #f2c46d;
+	--accent-ink: #1a1306;
+	--accent-soft: rgb(232 176 74 / 0.14);
+	--ok: #7bcf9b;
+	--ok-soft: rgb(123 207 155 / 0.14);
+	--warn: #f0a35e;
+	--danger: #f2766b;
+	--danger-soft: rgb(242 118 107 / 0.14);
+	--info: #8fb7ff;
+
+	--radius: 14px;
+	--radius-sm: 10px;
+	--tap: 3.5rem;
+	--gap: 0.75rem;
+	--font:
+		system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', Arial, sans-serif;
+	--mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+	--shadow: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 8px 24px rgb(0 0 0 / 0.35);
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	background: var(--bg);
+}
+
+body {
+	margin: 0;
+	min-height: 100dvh;
+	background: var(--bg);
+	color: var(--text);
+	font-family: var(--font);
+	font-size: 1.0625rem;
+	line-height: 1.45;
+	-webkit-font-smoothing: antialiased;
+	-webkit-tap-highlight-color: transparent;
+	overscroll-behavior-y: none;
+}
+
+h1,
+h2,
+h3 {
+	line-height: 1.2;
+	margin: 0;
+	letter-spacing: -0.01em;
+}
+
+a {
+	color: var(--accent);
+	text-underline-offset: 0.2em;
+}
+
+:focus-visible {
+	outline: 3px solid var(--accent);
+	outline-offset: 2px;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+}
+
+/* ---- buttons ---- */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	min-height: var(--tap);
+	padding: 0 1.25rem;
+	border-radius: var(--radius);
+	border: 1px solid var(--border-strong);
+	background: var(--surface-2);
+	color: var(--text);
+	font-weight: 600;
+	font-size: 1.05rem;
+	text-decoration: none;
+	cursor: pointer;
+	user-select: none;
+	touch-action: manipulation;
+	transition:
+		background-color 120ms,
+		border-color 120ms,
+		transform 80ms;
+}
+.btn:hover {
+	background: var(--surface-3);
+}
+.btn:active {
+	transform: scale(0.985);
+}
+.btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+.btn-primary {
+	background: var(--accent);
+	border-color: var(--accent);
+	color: var(--accent-ink);
+}
+.btn-primary:hover {
+	background: var(--accent-strong);
+}
+.btn-danger {
+	background: transparent;
+	border-color: var(--danger);
+	color: var(--danger);
+}
+.btn-danger:hover {
+	background: var(--danger-soft);
+}
+.btn-ghost {
+	background: transparent;
+	border-color: transparent;
+	color: var(--text-2);
+}
+.btn-ghost:hover {
+	background: var(--surface-2);
+	color: var(--text);
+}
+.btn-block {
+	width: 100%;
+}
+.btn-xl {
+	min-height: 5rem;
+	font-size: 1.3rem;
+	border-radius: 18px;
+}
+.btn-sm {
+	min-height: 2.5rem;
+	padding: 0 0.85rem;
+	font-size: 0.95rem;
+	border-radius: var(--radius-sm);
+}
+
+/* ---- form fields ---- */
+.field {
+	display: grid;
+	gap: 0.4rem;
+}
+.field > span,
+.label {
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+.input,
+.textarea,
+.select {
+	width: 100%;
+	min-height: var(--tap);
+	padding: 0.8rem 1rem;
+	border-radius: var(--radius);
+	border: 1px solid var(--border-strong);
+	background: var(--surface);
+	color: var(--text);
+	font-size: 1.1rem;
+}
+.textarea {
+	min-height: 6rem;
+	resize: vertical;
+	line-height: 1.4;
+}
+.input::placeholder,
+.textarea::placeholder {
+	color: #6b6e75;
+}
+.input:focus,
+.textarea:focus,
+.select:focus {
+	outline: none;
+	border-color: var(--accent);
+	box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.hint {
+	font-size: 0.9rem;
+	color: var(--muted);
+	margin: 0;
+}
+
+/* ---- surfaces ---- */
+.card {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 18px;
+	padding: 1.1rem;
+}
+.stack {
+	display: grid;
+	gap: var(--gap);
+}
+.row {
+	display: flex;
+	align-items: center;
+	gap: var(--gap);
+}
+.spacer {
+	flex: 1;
+}
+.muted {
+	color: var(--muted);
+}
+.mono {
+	font-family: var(--mono);
+	font-variant-numeric: tabular-nums;
+}
+.tabular {
+	font-variant-numeric: tabular-nums;
+}
+.visually-hidden {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.2rem 0.6rem;
+	border-radius: 999px;
+	font-size: 0.8rem;
+	font-weight: 600;
+	background: var(--surface-3);
+	color: var(--text-2);
+	white-space: nowrap;
+}
+.pill-ok {
+	background: var(--ok-soft);
+	color: var(--ok);
+}
+.pill-warn {
+	background: var(--accent-soft);
+	color: var(--accent);
+}
+.pill-danger {
+	background: var(--danger-soft);
+	color: var(--danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		transition: none !important;
+		animation: none !important;
+	}
+}
