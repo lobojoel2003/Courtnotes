@@ -1,0 +1,44 @@
+# Courtnotes with Postgres. Copy .env.example to .env, fill it in, then:
+#
+#   docker compose up -d
+#
+# and open http://localhost:3000 (volunteers) or http://localhost:3000/dashboard (coordinators).
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: courtnotes
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-courtnotes}
+      POSTGRES_DB: courtnotes
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U courtnotes']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: ghcr.io/lobojoel2003/courtnotes:latest
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      DATABASE_URL: postgres://courtnotes:${POSTGRES_PASSWORD:-courtnotes}@db:5432/courtnotes
+      ORIGIN: ${ORIGIN:-http://localhost:3000}
+      WATCHER_ACCESS_CODE: ${WATCHER_ACCESS_CODE:?Set WATCHER_ACCESS_CODE in .env}
+      PROGRAM_ID: ${PROGRAM_ID:-court-watch}
+      PROGRAM_NAME: ${PROGRAM_NAME:-Court Watch}
+      PROGRAM_JURISDICTION: ${PROGRAM_JURISDICTION:-}
+      PROGRAM_TIMEZONE: ${PROGRAM_TIMEZONE:-UTC}
+      COORDINATOR_EMAIL: ${COORDINATOR_EMAIL:-}
+      COORDINATOR_PASSWORD: ${COORDINATOR_PASSWORD:-}
+      COORDINATOR_NAME: ${COORDINATOR_NAME:-Coordinator}
+
+volumes:
+  pgdata:

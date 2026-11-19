@@ -1,0 +1,21 @@
+name: Feature request
+description: Suggest something that would help your court watch program
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Tell us about your program and how volunteers or coordinators work today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like to see?
+  - type: checkboxes
+    id: standard
+    attributes:
+      label: Data standard
+      options:
+        - label: This needs a new field or vocabulary term in the open data standard

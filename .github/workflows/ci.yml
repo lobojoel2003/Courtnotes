@@ -1,0 +1,202 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  quality:
+    name: Lint & type-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Prettier & ESLint
+        run: npm run lint
+      - name: svelte-check & service worker types
+        run: npm run check
+
+  test:
+    name: Tests (PGlite + Postgres ${{ matrix.postgres }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        postgres: ['16', '17']
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}-alpine
+        env:
+          POSTGRES_USER: courtnotes
+          POSTGRES_PASSWORD: courtnotes
+          POSTGRES_DB: courtnotes_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U courtnotes" --health-interval 5s --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Unit & integration tests (embedded PGlite)
+        run: npm run test:unit
+      - name: Integration tests (Postgres ${{ matrix.postgres }})
+        run: npm run test:unit
+        env:
+          TEST_DATABASE_URL: postgres://courtnotes:courtnotes@localhost:5432/courtnotes_test
+      - name: CLI scripts against Postgres
+        env:
+          DATABASE_URL: postgres://courtnotes:courtnotes@localhost:5432/courtnotes_test
+          COORDINATOR_PASSWORD: ci-password-123
+        run: |
+          npm run db:migrate
+          npm run db:seed -- --days 10 --reset
+          npm run coordinator:create -- --email ci@example.org --name "CI"
+
+  build:
+    name: Build
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Build (build ${{ github.run_number }})
+        run: npm run build
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+          COMMIT_SHA: ${{ github.sha }}
+      - name: Build summary
+        run: |
+          version=$(node -p "require('./package.json').version")
+          echo "### Courtnotes v${version} · build ${{ github.run_number }} · ${GITHUB_SHA::7}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Client bundle: $(du -sh build/client | cut -f1) · Service worker precache entries: $(grep -o 'path:' build/client/service-worker.js | wc -l)" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v5
+        with:
+          name: courtnotes-build-${{ github.run_number }}
+          path: build/
+          retention-days: 14
+          if-no-files-found: error
+
+  e2e:
+    name: End-to-end (Playwright)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v5
+        with:
+          name: courtnotes-build-${{ github.run_number }}
+          path: build/
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Phone, offline and coordinator flows
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v5
+        if: failure()
+        with:
+          name: playwright-report-${{ github.run_number }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  docker:
+    name: Docker image
+    needs: [test, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    env:
+      PUBLISH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=edge,branch=main
+            type=sha,prefix=sha-
+            type=ref,event=pr
+          labels: |
+            org.opencontainers.image.title=Courtnotes
+            org.opencontainers.image.licenses=AGPL-3.0-or-later
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD_NUMBER=${{ github.run_number }}
+            COMMIT_SHA=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Smoke test the image
+        run: |
+          image=$(echo '${{ steps.meta.outputs.tags }}' | head -n1)
+          docker run -d --name courtnotes -p 3000:3000 -e WATCHER_ACCESS_CODE=smoke "$image"
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/api/health; then echo; break; fi
+            sleep 2
+          done
+          curl -fsS http://localhost:3000/api/health | grep '"status":"ok"'
+          curl -fsS -o /dev/null http://localhost:3000/
+          curl -fsS -o /dev/null http://localhost:3000/service-worker.js
+          docker logs courtnotes
+      - name: Log in to GitHub Container Registry
+        if: env.PUBLISH == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish edge image
+        if: env.PUBLISH == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD_NUMBER=${{ github.run_number }}
+            COMMIT_SHA=${{ github.sha }}
+          cache-from: type=gha

@@ -1,0 +1,48 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      svelte:
+        patterns:
+          [
+            'svelte',
+            'svelte-check',
+            '@sveltejs/*',
+            'prettier-plugin-svelte',
+            'eslint-plugin-svelte'
+          ]
+      lint-and-test:
+        patterns:
+          [
+            'eslint*',
+            '@eslint/*',
+            'typescript-eslint',
+            'prettier',
+            'vitest',
+            '@vitest/*',
+            '@playwright/test',
+            'typescript',
+            '@types/*',
+            'globals',
+            'fake-indexeddb'
+          ]
+        update-types: ['minor', 'patch']
+      runtime:
+        patterns: ['pg', '@electric-sql/pglite', 'ajv', 'ajv-formats', 'idb', '@observablehq/plot']
+        update-types: ['minor', 'patch']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly

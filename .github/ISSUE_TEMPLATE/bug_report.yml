@@ -1,0 +1,45 @@
+name: Bug report
+description: Something in Courtnotes doesn't work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! **Never paste real court-watch records, defendant details, access codes or passwords here.** For security or privacy problems, follow [SECURITY.md](https://github.com/lobojoel2003/Courtnotes/blob/main/SECURITY.md) instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where?
+      options:
+        - Watcher app (phone)
+        - Offline / sync
+        - Coordinator dashboard
+        - Report or exports
+        - Data standard (schema)
+        - Deployment / Docker
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Shown at the bottom of Settings or the dashboard, e.g. "v1.0.0 · build 42 · 3f2c1ab"
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      placeholder: e.g. Pixel 7, Chrome 140 / iPhone 15, Safari 19
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Server logs or screenshots, with any personal data removed.
