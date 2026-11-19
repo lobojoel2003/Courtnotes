@@ -1,0 +1,17 @@
+{
+	"schema_version": "1.0.0",
+	"id": "9b2d4a1e-6c3f-4e8a-b7d5-1f0e2c3a4b5d",
+	"program": { "id": "example-court-watch" },
+	"observer": { "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7" },
+	"court": { "name": "Example County Justice Center", "courtroom": "1101" },
+	"judge": { "name": "Hon. R. Castellan" },
+	"hearing_type": "status_conference",
+	"started_at": "2026-03-02T14:02:00Z",
+	"duration_seconds": 48,
+	"counsel": "private",
+	"outcome": "continued",
+	"release_decision": "released_conditions",
+	"release_conditions": ["pretrial_supervision", "drug_testing"],
+	"updated_at": "2026-03-02T14:03:10Z",
+	"extensions": { "example-court-watch:docket_type": "misdemeanor" }
+}

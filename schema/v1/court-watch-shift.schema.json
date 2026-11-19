@@ -1,0 +1,25 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://raw.githubusercontent.com/lobojoel2003/Courtnotes/main/schema/v1/court-watch-shift.schema.json",
+	"title": "Court watch shift",
+	"description": "A block of time one volunteer spent watching one courtroom. Shifts let programs report coverage (how many hours of court were watched) alongside the hearings observed. Released under CC0 1.0.",
+	"type": "object",
+	"required": ["schema_version", "id", "program", "observer", "court", "started_at", "updated_at"],
+	"additionalProperties": false,
+	"properties": {
+		"schema_version": { "$ref": "common.schema.json#/$defs/schema_version" },
+		"id": { "$ref": "common.schema.json#/$defs/uuid" },
+		"program": { "$ref": "common.schema.json#/$defs/program" },
+		"observer": { "$ref": "common.schema.json#/$defs/observer" },
+		"court": { "$ref": "common.schema.json#/$defs/court" },
+		"judge": {
+			"description": "The judge presiding when the shift began. Individual hearings can name a different judge.",
+			"$ref": "common.schema.json#/$defs/judge"
+		},
+		"started_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+		"ended_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+		"notes": { "$ref": "common.schema.json#/$defs/long_text" },
+		"updated_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+		"extensions": { "$ref": "common.schema.json#/$defs/extensions" }
+	}
+}

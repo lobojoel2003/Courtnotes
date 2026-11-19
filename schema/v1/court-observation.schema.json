@@ -1,0 +1,132 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://raw.githubusercontent.com/lobojoel2003/Courtnotes/main/schema/v1/court-observation.schema.json",
+	"title": "Court observation",
+	"description": "One hearing observed by a court watch volunteer. This is the core record of the Courtnotes data standard, version 1. Released under CC0 1.0: use it in any tool, for any purpose.",
+	"type": "object",
+	"required": [
+		"schema_version",
+		"id",
+		"program",
+		"observer",
+		"court",
+		"hearing_type",
+		"started_at",
+		"updated_at"
+	],
+	"additionalProperties": false,
+	"properties": {
+		"schema_version": { "$ref": "common.schema.json#/$defs/schema_version" },
+		"id": {
+			"description": "Globally unique id generated on the observer's device when the hearing starts.",
+			"$ref": "common.schema.json#/$defs/uuid"
+		},
+		"program": { "$ref": "common.schema.json#/$defs/program" },
+		"observer": { "$ref": "common.schema.json#/$defs/observer" },
+		"shift_id": {
+			"description": "The shift (court-watch-shift record) during which this hearing was observed.",
+			"$ref": "common.schema.json#/$defs/uuid"
+		},
+		"court": { "$ref": "common.schema.json#/$defs/court" },
+		"judge": { "$ref": "common.schema.json#/$defs/judge" },
+		"case_number": {
+			"description": "Docket or case number, if the program records it. Public court records, but consider removing them from published datasets.",
+			"type": "string",
+			"minLength": 1,
+			"maxLength": 80
+		},
+		"hearing_type": { "$ref": "common.schema.json#/$defs/hearing_type" },
+		"started_at": {
+			"description": "When the case was called.",
+			"$ref": "common.schema.json#/$defs/timestamp"
+		},
+		"ended_at": {
+			"description": "When the next case was called or the hearing otherwise ended.",
+			"$ref": "common.schema.json#/$defs/timestamp"
+		},
+		"duration_seconds": {
+			"description": "Length of the hearing as measured by the observer's timer. Can differ from `ended_at - started_at` if the timer was paused.",
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 86400
+		},
+		"counsel": { "$ref": "common.schema.json#/$defs/counsel" },
+		"outcome": { "$ref": "common.schema.json#/$defs/outcome" },
+		"release_decision": { "$ref": "common.schema.json#/$defs/release_decision" },
+		"bail": {
+			"description": "Money bail set at this hearing. Present only when `release_decision` is `bail_set`.",
+			"type": "object",
+			"required": ["amount"],
+			"additionalProperties": false,
+			"properties": {
+				"amount": {
+					"description": "Total bail amount set by the judge, in major currency units (dollars, not cents).",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 100000000
+				},
+				"currency": {
+					"description": "ISO 4217 currency code. Defaults to USD when absent.",
+					"type": "string",
+					"pattern": "^[A-Z]{3}$",
+					"default": "USD"
+				},
+				"type": { "$ref": "common.schema.json#/$defs/bail_type" },
+				"prosecution_request": {
+					"description": "Amount the prosecution asked for, if stated.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 100000000
+				}
+			}
+		},
+		"release_conditions": {
+			"description": "Non-monetary conditions of release, if any were imposed.",
+			"type": "array",
+			"uniqueItems": true,
+			"maxItems": 20,
+			"items": { "$ref": "common.schema.json#/$defs/release_condition" }
+		},
+		"defendant": {
+			"description": "What the observer could see about the defendant. Every field is optional, and perceived characteristics are the observer's perception only. Never record names.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"appearance": { "$ref": "common.schema.json#/$defs/appearance" },
+				"in_custody": {
+					"description": "Whether the defendant was in custody (e.g. brought from jail) at the hearing.",
+					"type": "boolean"
+				},
+				"interpreter": { "$ref": "common.schema.json#/$defs/interpreter" },
+				"perceived_gender": { "$ref": "common.schema.json#/$defs/perceived_gender" },
+				"perceived_race_ethnicity": {
+					"$ref": "common.schema.json#/$defs/perceived_race_ethnicity"
+				},
+				"perceived_age_range": { "$ref": "common.schema.json#/$defs/perceived_age_range" }
+			}
+		},
+		"judge_remarks": {
+			"description": "Notable words from the bench, as close to verbatim as possible.",
+			"$ref": "common.schema.json#/$defs/long_text"
+		},
+		"notes": {
+			"description": "Free-text notes from the observer.",
+			"$ref": "common.schema.json#/$defs/long_text"
+		},
+		"recorded_at": {
+			"description": "When the record was first created on the device.",
+			"$ref": "common.schema.json#/$defs/timestamp"
+		},
+		"updated_at": {
+			"description": "When the record was last changed. Used for last-writer-wins sync.",
+			"$ref": "common.schema.json#/$defs/timestamp"
+		},
+		"extensions": { "$ref": "common.schema.json#/$defs/extensions" }
+	},
+	"dependentSchemas": {
+		"bail": {
+			"required": ["release_decision"],
+			"properties": { "release_decision": { "const": "bail_set" } }
+		}
+	}
+}

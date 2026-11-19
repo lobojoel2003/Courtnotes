@@ -1,0 +1,357 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://raw.githubusercontent.com/lobojoel2003/Courtnotes/main/schema/v1/common.schema.json",
+	"title": "Courtnotes common definitions",
+	"description": "Shared building blocks and controlled vocabularies for the Courtnotes court-watch data standard, version 1. Released under CC0 1.0.",
+	"$defs": {
+		"schema_version": {
+			"description": "Version of the Courtnotes data standard the record conforms to. Minor versions only ever add optional fields or vocabulary terms, so any 1.x reader can read any 1.x record.",
+			"type": "string",
+			"pattern": "^1\\.[0-9]+\\.[0-9]+$",
+			"examples": ["1.0.0"]
+		},
+		"uuid": {
+			"type": "string",
+			"format": "uuid",
+			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+		},
+		"timestamp": {
+			"description": "RFC 3339 date-time with an explicit offset, e.g. 2026-03-02T09:14:00-05:00 or 2026-03-02T14:14:00Z.",
+			"type": "string",
+			"format": "date-time"
+		},
+		"short_text": {
+			"type": "string",
+			"minLength": 1,
+			"maxLength": 200
+		},
+		"long_text": {
+			"type": "string",
+			"maxLength": 5000
+		},
+		"program": {
+			"description": "The court watch program that collected the record.",
+			"type": "object",
+			"required": ["id"],
+			"additionalProperties": false,
+			"properties": {
+				"id": {
+					"description": "Stable, URL-safe identifier chosen by the program, e.g. `philly-bail-watch`.",
+					"type": "string",
+					"pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+				},
+				"name": { "$ref": "#/$defs/short_text" }
+			}
+		},
+		"observer": {
+			"description": "The volunteer who made the observation. Use a pseudonymous id; names are optional and should be stripped from public exports.",
+			"type": "object",
+			"required": ["id"],
+			"additionalProperties": false,
+			"properties": {
+				"id": { "$ref": "#/$defs/uuid" },
+				"name": { "$ref": "#/$defs/short_text" }
+			}
+		},
+		"court": {
+			"description": "Where the hearing took place.",
+			"type": "object",
+			"required": ["name"],
+			"additionalProperties": false,
+			"properties": {
+				"name": {
+					"description": "Courthouse or court name as it appears on the building or docket, e.g. `Criminal Justice Center`.",
+					"$ref": "#/$defs/short_text"
+				},
+				"courtroom": {
+					"description": "Courtroom number or name, e.g. `1101` or `Arraignment Court B`.",
+					"$ref": "#/$defs/short_text"
+				},
+				"jurisdiction": {
+					"description": "ISO 3166-2 subdivision code of the state or province, e.g. `US-PA`.",
+					"type": "string",
+					"pattern": "^[A-Z]{2}(-[A-Z0-9]{1,3})?$"
+				},
+				"county": {
+					"description": "County, parish or borough, e.g. `Philadelphia`.",
+					"$ref": "#/$defs/short_text"
+				}
+			}
+		},
+		"judge": {
+			"description": "The judicial officer presiding over the hearing. Judges are public officials acting in public; recording their names is the point of court watching.",
+			"type": "object",
+			"required": ["name"],
+			"additionalProperties": false,
+			"properties": {
+				"name": {
+					"description": "Name as announced in court or shown on the courtroom door, e.g. `Hon. A. Marlowe`.",
+					"$ref": "#/$defs/short_text"
+				}
+			}
+		},
+		"hearing_type": {
+			"description": "The kind of proceeding observed.",
+			"oneOf": [
+				{
+					"const": "arraignment",
+					"title": "Arraignment",
+					"description": "First appearance where charges are read and pretrial release is usually decided."
+				},
+				{
+					"const": "bail_review",
+					"title": "Bail review",
+					"description": "Hearing to set, reconsider or modify bail or release conditions."
+				},
+				{
+					"const": "preliminary_hearing",
+					"title": "Preliminary hearing",
+					"description": "Hearing to decide whether there is enough evidence for the case to proceed."
+				},
+				{
+					"const": "status_conference",
+					"title": "Status / scheduling",
+					"description": "Status check, calendar call or scheduling conference."
+				},
+				{
+					"const": "motion",
+					"title": "Motion",
+					"description": "Argument on a motion, such as to suppress evidence or dismiss."
+				},
+				{
+					"const": "plea",
+					"title": "Plea",
+					"description": "Change of plea or plea agreement colloquy."
+				},
+				{
+					"const": "sentencing",
+					"title": "Sentencing",
+					"description": "Imposition of sentence after conviction or plea."
+				},
+				{
+					"const": "trial",
+					"title": "Trial",
+					"description": "Any portion of a bench or jury trial."
+				},
+				{
+					"const": "probation_violation",
+					"title": "Probation violation",
+					"description": "Violation-of-probation or parole hearing."
+				},
+				{
+					"const": "other",
+					"title": "Other",
+					"description": "Anything else; describe it in notes."
+				}
+			]
+		},
+		"counsel": {
+			"description": "Who represented the defendant at this hearing.",
+			"oneOf": [
+				{
+					"const": "public_defender",
+					"title": "Public defender",
+					"description": "Staff attorney from a public defender office."
+				},
+				{
+					"const": "court_appointed",
+					"title": "Court-appointed",
+					"description": "Private attorney appointed and paid by the court."
+				},
+				{ "const": "private", "title": "Private", "description": "Retained private attorney." },
+				{
+					"const": "none",
+					"title": "No lawyer",
+					"description": "Defendant appeared without any lawyer."
+				},
+				{
+					"const": "waived",
+					"title": "Waived / pro se",
+					"description": "Defendant waived counsel and represented themselves."
+				},
+				{
+					"const": "unknown",
+					"title": "Couldn't tell",
+					"description": "The observer could not determine representation."
+				}
+			]
+		},
+		"outcome": {
+			"description": "What happened to the case at the end of the hearing.",
+			"oneOf": [
+				{
+					"const": "continued",
+					"title": "Continued",
+					"description": "Postponed or rescheduled to another date."
+				},
+				{
+					"const": "dismissed",
+					"title": "Dismissed / withdrawn",
+					"description": "Charges dismissed, withdrawn or nolle prossed."
+				},
+				{
+					"const": "held_for_trial",
+					"title": "Held for trial",
+					"description": "Bound over or held for court on some or all charges."
+				},
+				{
+					"const": "plea_entered",
+					"title": "Plea entered",
+					"description": "Guilty or no-contest plea accepted."
+				},
+				{ "const": "sentenced", "title": "Sentenced", "description": "A sentence was imposed." },
+				{
+					"const": "diversion",
+					"title": "Diversion",
+					"description": "Sent to a diversion, treatment or problem-solving court program."
+				},
+				{
+					"const": "warrant_issued",
+					"title": "Warrant issued",
+					"description": "Bench warrant issued, usually for a missed appearance."
+				},
+				{
+					"const": "other",
+					"title": "Other",
+					"description": "Anything else; describe it in notes."
+				}
+			]
+		},
+		"release_decision": {
+			"description": "The pretrial release decision made at this hearing, if any.",
+			"oneOf": [
+				{
+					"const": "released_ror",
+					"title": "Released (ROR)",
+					"description": "Released on own recognizance with no money bail."
+				},
+				{
+					"const": "released_conditions",
+					"title": "Released w/ conditions",
+					"description": "Released without money bail but with non-monetary conditions."
+				},
+				{
+					"const": "bail_set",
+					"title": "Bail set",
+					"description": "Money bail was set. Record the amount in `bail`."
+				},
+				{
+					"const": "held_without_bail",
+					"title": "Held, no bail",
+					"description": "Detained with no possibility of release on bail."
+				},
+				{
+					"const": "remains_in_custody",
+					"title": "Stays in custody",
+					"description": "Remains detained for another reason, such as a detainer or existing sentence."
+				},
+				{
+					"const": "not_addressed",
+					"title": "Not addressed",
+					"description": "Release was not discussed at this hearing."
+				}
+			]
+		},
+		"bail_type": {
+			"description": "How the money bail must be posted.",
+			"oneOf": [
+				{
+					"const": "cash",
+					"title": "Cash",
+					"description": "Full amount payable in cash."
+				},
+				{
+					"const": "secured",
+					"title": "Secured / surety",
+					"description": "Secured by property or a bail bond agent."
+				},
+				{
+					"const": "deposit",
+					"title": "10% deposit",
+					"description": "A percentage (often 10%) is payable to the court."
+				},
+				{
+					"const": "unsecured",
+					"title": "Unsecured",
+					"description": "Nothing paid up front; owed only on non-appearance."
+				},
+				{
+					"const": "other",
+					"title": "Other",
+					"description": "Anything else; describe it in notes."
+				}
+			]
+		},
+		"release_condition": {
+			"description": "A non-monetary condition of release.",
+			"oneOf": [
+				{ "const": "pretrial_supervision", "title": "Pretrial supervision" },
+				{ "const": "electronic_monitoring", "title": "Electronic monitoring" },
+				{ "const": "stay_away_order", "title": "Stay-away / no-contact" },
+				{ "const": "drug_testing", "title": "Drug or alcohol testing" },
+				{ "const": "treatment", "title": "Treatment program" },
+				{ "const": "curfew", "title": "Curfew / house arrest" },
+				{ "const": "travel_restriction", "title": "Travel restriction" },
+				{ "const": "firearm_surrender", "title": "Surrender firearms" },
+				{ "const": "other", "title": "Other" }
+			]
+		},
+		"appearance": {
+			"description": "How the defendant appeared.",
+			"oneOf": [
+				{ "const": "in_person", "title": "In person" },
+				{ "const": "video", "title": "By video" },
+				{ "const": "not_present", "title": "Not present" }
+			]
+		},
+		"interpreter": {
+			"description": "Whether an interpreter was needed and provided.",
+			"oneOf": [
+				{ "const": "not_needed", "title": "Not needed" },
+				{ "const": "provided", "title": "Provided" },
+				{ "const": "needed_not_provided", "title": "Needed, not provided" }
+			]
+		},
+		"perceived_gender": {
+			"description": "Gender as perceived by the observer. Never ask the defendant.",
+			"oneOf": [
+				{ "const": "woman", "title": "Woman" },
+				{ "const": "man", "title": "Man" },
+				{ "const": "another_gender", "title": "Another gender" },
+				{ "const": "unsure", "title": "Unsure" }
+			]
+		},
+		"perceived_race_ethnicity": {
+			"description": "Race or ethnicity as perceived by the observer, used only for aggregate disparity analysis. Never ask the defendant.",
+			"oneOf": [
+				{ "const": "black", "title": "Black" },
+				{ "const": "latino", "title": "Latino/a" },
+				{ "const": "white", "title": "White" },
+				{ "const": "asian", "title": "Asian" },
+				{ "const": "indigenous", "title": "Indigenous" },
+				{ "const": "middle_eastern", "title": "Middle Eastern / N. African" },
+				{ "const": "another", "title": "Another / multiracial" },
+				{ "const": "unsure", "title": "Unsure" }
+			]
+		},
+		"perceived_age_range": {
+			"description": "Age range as perceived by the observer.",
+			"oneOf": [
+				{ "const": "under_18", "title": "Under 18" },
+				{ "const": "18_24", "title": "18–24" },
+				{ "const": "25_34", "title": "25–34" },
+				{ "const": "35_44", "title": "35–44" },
+				{ "const": "45_54", "title": "45–54" },
+				{ "const": "55_64", "title": "55–64" },
+				{ "const": "65_plus", "title": "65+" },
+				{ "const": "unsure", "title": "Unsure" }
+			]
+		},
+		"extensions": {
+			"description": "Program-specific fields that are not part of the standard. Keys must be namespaced with the program id, e.g. `philly-bail-watch:docket_type`, so they never collide with future standard fields.",
+			"type": "object",
+			"propertyNames": { "pattern": "^[a-z0-9][a-z0-9-]*:[a-z0-9_]+$" },
+			"maxProperties": 50
+		}
+	}
+}

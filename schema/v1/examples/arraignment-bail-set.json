@@ -1,0 +1,34 @@
+{
+	"schema_version": "1.0.0",
+	"id": "0f8fad5b-d9cb-469f-a165-70867728950e",
+	"program": { "id": "example-court-watch", "name": "Example County Court Watch" },
+	"observer": { "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7" },
+	"shift_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+	"court": {
+		"name": "Example County Justice Center",
+		"courtroom": "Arraignment Court B",
+		"jurisdiction": "US-PA",
+		"county": "Example"
+	},
+	"judge": { "name": "Hon. A. Marlowe" },
+	"hearing_type": "arraignment",
+	"started_at": "2026-03-02T09:14:05-05:00",
+	"ended_at": "2026-03-02T09:16:41-05:00",
+	"duration_seconds": 156,
+	"counsel": "public_defender",
+	"outcome": "continued",
+	"release_decision": "bail_set",
+	"bail": { "amount": 25000, "currency": "USD", "type": "deposit", "prosecution_request": 50000 },
+	"release_conditions": ["stay_away_order"],
+	"defendant": {
+		"appearance": "video",
+		"in_custody": true,
+		"interpreter": "not_needed",
+		"perceived_gender": "man",
+		"perceived_age_range": "25_34"
+	},
+	"judge_remarks": "I don't care that he has a job. Twenty-five thousand, ten percent.",
+	"notes": "Defense asked for ROR citing two kids at home; no discussion of ability to pay.",
+	"recorded_at": "2026-03-02T09:14:05-05:00",
+	"updated_at": "2026-03-02T09:17:30-05:00"
+}

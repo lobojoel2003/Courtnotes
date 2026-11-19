@@ -1,0 +1,16 @@
+{
+	"schema_version": "1.0.0",
+	"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+	"program": { "id": "example-court-watch", "name": "Example County Court Watch" },
+	"observer": { "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7" },
+	"court": {
+		"name": "Example County Justice Center",
+		"courtroom": "Arraignment Court B",
+		"jurisdiction": "US-PA"
+	},
+	"judge": { "name": "Hon. A. Marlowe" },
+	"started_at": "2026-03-02T08:55:00-05:00",
+	"ended_at": "2026-03-02T12:10:00-05:00",
+	"notes": "Courtroom started 40 minutes late. Video link to the jail dropped twice.",
+	"updated_at": "2026-03-02T12:10:00-05:00"
+}
